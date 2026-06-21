@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book a Lesson — Classic Driving School</title>
+<meta name="description" content="Book your driving lesson with Classic Driving School. Pick your course, transmission preference, and schedule." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Karla:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-row">
+    <a class="brand" href="index.html"><span class="dot"></span>Classic Driving School</a>
+    <nav class="primary-nav">
+      <a href="index.html#courses">Courses</a>
+      <a href="index.html#process">How It Works</a>
+      <a href="index.html#reviews">Reviews</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+    <a class="btn btn-ghost" href="index.html">← Back Home</a>
+  </div>
+</header>
+<div class="lane-divider"></div>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head" style="margin: 0 auto 40px; text-align: center; max-width: 560px;">
+      <p class="eyebrow">Booking</p>
+      <h2 class="section-title">Reserve your spot</h2>
+      <p>Fill in your details below. We'll confirm by email within 24 hours.</p>
+    </div>
+
+    <div class="book-shell">
+      <form id="booking-form">
+        <!-- Web3Forms access key -->
+        <input type="hidden" name="access_key" value="a6363bad-eb4c-42dd-85a3-a13a1c037e6a">
+        <input type="hidden" name="subject" value="New Booking — Classic Driving School">
+        <input type="hidden" name="from_name" value="Classic Driving School Website">
+        <!-- honeypot spam trap, leave blank -->
+        <input type="checkbox" name="botcheck" style="display:none">
+
+        <div class="two-col">
+          <div class="form-row">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="form-row">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-row">
+          <label for="course">Course</label>
+          <select id="course" name="course" required>
+            <option value="" disabled selected>Select a course</option>
+            <optgroup label="Prospects">
+              <option>Basic Course (4 weeks) — ₦60,000</option>
+              <option>Intensive Course (2 weeks) — ₦80,000</option>
+              <option>Refresher Course — ₦40,000</option>
+            </optgroup>
+            <optgroup label="Private Session">
+              <option>Per Hour (Manual) — ₦10,000</option>
+              <option>Per Hour (Automatic) — ₦8,000</option>
+              <option>Weekend Package — ₦35,000</option>
+            </optgroup>
+            <optgroup label="Other Offers">
+              <option>FRSC Drivers Licence Assist — ₦25,000</option>
+              <option>Highway Confidence Course — ₦20,000</option>
+              <option>Corporate / Group Training — On request</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label>Transmission Preference</label>
+          <div class="radio-pair">
+            <label><input type="radio" name="transmission" value="Manual" checked><span>Manual</span></label>
+            <label><input type="radio" name="transmission" value="Automatic"><span>Automatic</span></label>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="form-row">
+            <label for="date">Preferred Date</label>
+            <input type="date" id="date" name="preferred_date" required>
+          </div>
+          <div class="form-row">
+            <label for="time">Preferred Time</label>
+            <input type="time" id="time" name="preferred_time" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="message">Anything else we should know? (optional)</label>
+          <textarea id="message" name="message" rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-red" style="width:100%;" id="submit-btn">Submit Booking</button>
+        <div id="form-status"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div class="lane-divider"></div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h5>Classic Driving School</h5>
+        <p>FRSC-registered driving school founded in 2008 by Ajayi Oluwafemi. Lagos, Nigeria.</p>
+      </div>
+      <div>
+        <h5>Hours</h5>
+        <ul>
+          <li>Mon – Sat: 7:00am – 6:00pm</li>
+          <li>Sunday: Closed</li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contact</h5>
+        <ul>
+          <li>classicdrivingschool01@gmail.com</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Classic Driving School. FRSC-Registered.</div>
+  </div>
+</footer>
+
+<script>
+const form = document.getElementById('booking-form');
+const status = document.getElementById('form-status');
+const submitBtn = document.getElementById('submit-btn');
+
+form.addEventListener('submit', async function (e) {
+  e.preventDefault();
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending...';
+  status.className = '';
+  status.textContent = '';
+
+  const formData = new FormData(form);
+  const object = Object.fromEntries(formData);
+  const json = JSON.stringify(object);
+
+  try {
+    const response = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: json
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      status.className = 'success';
+      status.textContent = "Booking received! We'll confirm by email within 24 hours.";
+      form.reset();
+    } else {
+      status.className = 'error';
+      status.textContent = result.message || 'Something went wrong. Please try again or call us directly.';
+    }
+  } catch (error) {
+    status.className = 'error';
+    status.textContent = 'Network error — please check your connection and try again.';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Booking';
+  }
+});
+</script>
+
+</body>
+</html>
