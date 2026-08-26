@@ -173,36 +173,15 @@ const LEAD_API_URL = 'https://classicdrivingschool.com/public/leads';
 // straight from the browser - no backend involved. Create a free account
 // at https://www.emailjs.com, connect an email (Gmail/Outlook/etc.) as an
 // Email Service, and create a Template using the variables referenced
-// below, then replace these three placeholders with the values EmailJS
-// gives you.
+// below ({{name}}, {{course}}, {{preferred_date}}, {{preferred_time}},
+// {{transmission}} in the body; {{to_email}} as the "To Email" field),
+// then replace these three placeholders with the values EmailJS gives you.
 const EMAILJS_PUBLIC_KEY = 'YOUR_EMAILJS_PUBLIC_KEY';
 const EMAILJS_SERVICE_ID = 'YOUR_EMAILJS_SERVICE_ID';
 const EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
 
 if (window.emailjs && EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
   emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-}
-
-// The "Course" dropdown packs a programme name, duration, and price into
-// one string (e.g. "Non-Experience (Auto & Manual) — 4 Weeks — ₦95,000"),
-// separated by em dashes. A flat one-off service like "Learners' Permit
-// Trainee — ₦6,000" has no duration segment at all, so that comes back
-// as "N/A" rather than a guess.
-function splitCourseLabel(course) {
-  if (!course) {
-    return { programme: 'To be confirmed', duration: 'N/A' };
-  }
-
-  const parts = course.split('—').map(function (part) { return part.trim(); });
-
-  if (parts.length && parts[parts.length - 1].startsWith('₦')) {
-    parts.pop();
-  }
-
-  return {
-    programme: parts[0] || 'To be confirmed',
-    duration: parts[1] || 'N/A',
-  };
 }
 
 // The date input submits a raw "YYYY-MM-DD" value - render it the way a
@@ -221,21 +200,39 @@ function formatStartDate(rawDate) {
   return parsed.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+// The time input submits a raw 24-hour "HH:MM" value - render it the way
+// a person would write it in a letter (e.g. "10:00 AM").
+function formatPreferredTime(rawTime) {
+  if (!rawTime) {
+    return 'Any time';
+  }
+
+  const [hoursStr, minutes] = rawTime.split(':');
+  const hours = parseInt(hoursStr, 10);
+
+  if (isNaN(hours)) {
+    return rawTime;
+  }
+
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const twelveHour = ((hours + 11) % 12) + 1;
+
+  return `${twelveHour}:${minutes} ${period}`;
+}
+
 function sendBookingConfirmationEmail(object) {
   if (!window.emailjs || EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') {
     console.warn('EmailJS is not configured yet - no confirmation email sent to the customer.');
     return;
   }
 
-  const { programme, duration } = splitCourseLabel(object.course);
-
   emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
     to_email: object.email,
-    customer_name: object.name,
-    programme_name: programme,
-    duration: duration,
-    start_date: formatStartDate(object.preferred_date),
-    training_type: object.transmission || 'N/A',
+    name: object.name,
+    course: object.course || 'To be confirmed',
+    preferred_date: formatStartDate(object.preferred_date),
+    preferred_time: formatPreferredTime(object.preferred_time),
+    transmission: object.transmission || 'N/A',
   }).catch(function (error) {
     console.warn('Booking confirmation email failed (booking still recorded):', error);
   });
