@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -178,7 +177,11 @@ Professional Driver Training &amp; Defensive Driving
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+// Initialise EmailJS with your public key
+emailjs.init('-_9M0O1KMT6XOgrRC');
+
 const form = document.getElementById('booking-form');
 const status = document.getElementById('form-status');
 const submitBtn = document.getElementById('submit-btn');
@@ -195,6 +198,7 @@ form.addEventListener('submit', async function (e) {
   const json = JSON.stringify(object);
 
   try {
+    // Step 1: Send booking notification to you via Web3Forms
     const response = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: {
@@ -206,6 +210,16 @@ form.addEventListener('submit', async function (e) {
     const result = await response.json();
 
     if (result.success) {
+      // Step 2: Send confirmation email to customer via EmailJS
+      await emailjs.send('service_lm9tueg', 'template_mj4ahub', {
+        name: object.name,
+        email: object.email,
+        course: object.course,
+        preferred_date: object.preferred_date,
+        preferred_time: object.preferred_time,
+        transmission: object.transmission
+      });
+
       status.className = 'success';
       status.textContent = "Booking received! Check your email for a confirmation. We'll be in touch shortly.";
       form.reset();
