@@ -32,16 +32,46 @@
     <div class="section-head" style="margin: 0 auto 40px; text-align: center; max-width: 560px;">
       <p class="eyebrow">Booking</p>
       <h2 class="section-title">Reserve your spot</h2>
-      <p>Fill in your details below. We'll confirm by email within 24 hours.</p>
+      <p>Fill in your details below. You'll receive an instant confirmation email, and we'll follow up shortly to confirm your schedule.</p>
     </div>
 
     <div class="book-shell">
       <form id="booking-form">
-        <!-- Web3Forms access key -->
+        <!-- Web3Forms config -->
         <input type="hidden" name="access_key" value="a6363bad-eb4c-42dd-85a3-a13a1c037e6a">
         <input type="hidden" name="subject" value="New Booking — Classic Driving School">
         <input type="hidden" name="from_name" value="Classic Driving School Website">
-        <!-- honeypot spam trap, leave blank -->
+
+        <!-- Autoresponder: sends confirmation email to the customer -->
+        <input type="hidden" name="replyto" value="email">
+        <input type="hidden" name="autoresponse_subject" value="Booking Confirmation — Classic Driving School">
+        <input type="hidden" name="autoresponse" value="Dear {name},
+
+Thank you for booking your driving training programme with Classic Driving School.
+
+We are pleased to confirm that we have received your booking request successfully.
+
+Booking Details
+Programme: {course}
+Preferred Start Date: {preferred_date}
+Preferred Time: {preferred_time}
+Training Type: {transmission}
+
+Our team will review your booking and contact you shortly with confirmation of your training schedule and any further information required.
+
+If you have any questions or need to make changes to your booking, please contact Classic Driving School:
+Phone: 08068878663 / 08094760609
+Email: classicdrivingschool112@gmail.com
+
+Thank you for choosing Classic Driving School.
+When you say Classic, you say it all.
+
+Best regards,
+Classic Driving School
+Professional Driver Training &amp; Defensive Driving
+2 Trans Woji Elelenwo Road, YKC Junction, Woji, Port Harcourt.">
+
+        <!-- Honeypot spam trap -->
         <input type="checkbox" name="botcheck" style="display:none">
 
         <div class="two-col">
@@ -75,7 +105,6 @@
             <optgroup label="Private Session">
               <option>Executive Program with AC — 3 Weeks — ₦155,000</option>
               <option>Executive Training without AC — 3 Weeks — ₦125,000</option>
-              <option>Executive Training without AC — 4 Weeks — ₦155,000</option>
               <option>VIP Program (Personal Car) — 3 Weeks — ₦125,000</option>
             </optgroup>
             <optgroup label="Other Offers">
@@ -120,7 +149,7 @@
 
 <div class="lane-divider"></div>
 
-<footer class="site-footer">
+<footer class="site-footer" id="contact">
   <div class="container">
     <div class="footer-grid">
       <div>
@@ -141,17 +170,8 @@
           <li>classicdrivingschool112@gmail.com</li>
           <li><a href="tel:+2348068878663">0806 887 8663</a></li>
           <li><a href="tel:+2348094760609">0809 476 0609</a></li>
-          <li><a href="https://wa.me/2348068878663?text=Hi%2C%20I%27d%20like%20to%20book%20a%20driving%20lesson." target="_blank" rel="noopener">Chat on WhatsApp →</a></li>
         </ul>
       </div>
-    </div>
-    <div class="footer-map">
-      <iframe
-        src="https://www.google.com/maps?q=Classic+Driving+School%2C+Port+Harcourt&output=embed"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        title="Classic Driving School location on the map"
-      ></iframe>
     </div>
     <div class="footer-bottom">&copy; 2026 Classic Driving School. FRSC-Approved.</div>
   </div>
@@ -161,12 +181,6 @@
 const form = document.getElementById('booking-form');
 const status = document.getElementById('form-status');
 const submitBtn = document.getElementById('submit-btn');
-
-// The management system this booking should land in as a Lead, alongside
-// the Web3Forms email below. Best-effort: if this fails, the booking still
-// goes through on the email side, so it's never allowed to block or change
-// the status message the visitor sees.
-const LEAD_API_URL = 'https://classicdrivingschool.com/public/leads';
 
 form.addEventListener('submit', async function (e) {
   e.preventDefault();
@@ -178,17 +192,6 @@ form.addEventListener('submit', async function (e) {
   const formData = new FormData(form);
   const object = Object.fromEntries(formData);
   const json = JSON.stringify(object);
-
-  fetch(LEAD_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: json
-  }).catch(function (error) {
-    console.warn('Lead capture failed (booking email still sent):', error);
-  });
 
   try {
     const response = await fetch('https://api.web3forms.com/submit', {
@@ -203,7 +206,7 @@ form.addEventListener('submit', async function (e) {
 
     if (result.success) {
       status.className = 'success';
-      status.textContent = "Booking received! We'll confirm by email within 24 hours.";
+      status.textContent = "Booking received! Check your email for a confirmation. We'll be in touch shortly.";
       form.reset();
     } else {
       status.className = 'error';
