@@ -163,12 +163,6 @@ const form = document.getElementById('booking-form');
 const status = document.getElementById('form-status');
 const submitBtn = document.getElementById('submit-btn');
 
-// The management system this booking should land in as a Lead, alongside
-// the Web3Forms email below. Best-effort: if this fails, the booking still
-// goes through on the email side, so it's never allowed to block or change
-// the status message the visitor sees.
-const LEAD_API_URL = 'https://classicdrivingschool.com/public/leads';
-
 // EmailJS sends the customer their own templated booking confirmation,
 // straight from the browser - no backend involved. The template (in your
 // EmailJS account, under Email Templates) uses {{name}}, {{course}},
@@ -218,11 +212,10 @@ function formatPreferredTime(rawTime) {
   return `${twelveHour}:${minutes} ${period}`;
 }
 
-// Best-effort, exactly like the Lead capture above: a customer's booking
-// is already fully recorded (Web3Forms + the Lead) by the time this
-// runs, so a failure here only means they miss the instant confirmation
-// email - it must never turn an otherwise-successful booking into an
-// error message.
+// Best-effort: a customer's booking is already fully recorded by
+// Web3Forms by the time this runs, so a failure here only means they
+// miss the instant confirmation email - it must never turn an
+// otherwise-successful booking into an error message.
 function sendBookingConfirmationEmail(object) {
   if (!window.emailjs) {
     console.warn('EmailJS failed to load - no confirmation email sent to the customer.');
@@ -251,17 +244,6 @@ form.addEventListener('submit', async function (e) {
   const formData = new FormData(form);
   const object = Object.fromEntries(formData);
   const json = JSON.stringify(object);
-
-  fetch(LEAD_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: json
-  }).catch(function (error) {
-    console.warn('Lead capture failed (booking email still sent):', error);
-  });
 
   if (!object.botcheck) {
     sendBookingConfirmationEmail(object);
