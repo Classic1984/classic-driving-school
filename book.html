@@ -163,6 +163,15 @@ const form = document.getElementById('booking-form');
 const status = document.getElementById('form-status');
 const submitBtn = document.getElementById('submit-btn');
 
+// Our own Google Apps Script web app, running under the school's Google
+// account (classicdrivingschool112@gmail.com). It takes the booking and
+// creates a matching event on the school's Google Calendar. Nothing is
+// stored anywhere else, and no third party is involved.
+//
+// The script itself lives at script.google.com under the school account -
+// open it there to change what the calendar event says.
+const CALENDAR_API_URL = 'https://script.google.com/macros/s/AKfycbx8voutMzdMabBPreKV4F66AUFjQNH7KIc8WWj7TJnWNO1q1PCRFBeiAfVwqmf1VB5UaA/exec';
+
 // EmailJS sends the customer their own templated booking confirmation,
 // straight from the browser - no backend involved. The template (in your
 // EmailJS account, under Email Templates) uses {{name}}, {{course}},
@@ -234,6 +243,26 @@ function sendBookingConfirmationEmail(object) {
   });
 }
 
+// Also best-effort. The booking email is what actually matters; the
+// calendar event is a convenience on top of it, so if the script is
+// unreachable the visitor should never see an error because of it.
+//
+// Note the text/plain content type: Apps Script web apps don't answer
+// CORS preflight requests, and sending JSON with an application/json
+// header would trigger one and fail. text/plain avoids the preflight
+// entirely, and the script still reads the body with JSON.parse().
+function addBookingToCalendar(json) {
+  fetch(CALENDAR_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: json
+  }).catch(function (error) {
+    console.warn('Calendar event failed (booking still recorded):', error);
+  });
+}
+
 form.addEventListener('submit', async function (e) {
   e.preventDefault();
   submitBtn.disabled = true;
@@ -247,6 +276,7 @@ form.addEventListener('submit', async function (e) {
 
   if (!object.botcheck) {
     sendBookingConfirmationEmail(object);
+    addBookingToCalendar(json);
   }
 
   try {
